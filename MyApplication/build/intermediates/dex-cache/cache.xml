@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\21.0.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\pre-dexed\release\classes-69be3aa0c679a1f868f98f673d1d6cdae793f9d3.jar" />
+    </item>
+    <item
+        jar="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\jars\libs\internal_impl-21.0.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
+        <dex dex="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\pre-dexed\release\internal_impl-21.0.3-5d08e65a4de6a7745312149023cc1509b034cb5f.jar" />
+    </item>
+    <item
+        jar="D:\sdk\extras\android\m2repository\com\android\support\support-annotations\21.0.3\support-annotations-21.0.3.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
+        <dex dex="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\pre-dexed\release\support-annotations-21.0.3-2c7b3f93a4765de67fc456e30fee656c798d7e65.jar" />
+    </item>
+    <item
+        jar="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\exploded-aar\MyApplication\face-1.1.0\unspecified\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b40d5a017179a5aa1ef65d47e8a793a56c2b9aeb">
+        <dex dex="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\pre-dexed\release\classes-411a47846c9aba467e9c652655ac5db9c589bc30.jar" />
+    </item>
+    <item
+        jar="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.3\jars\classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="C:\Users\sheng\Documents\IdeaProjects\face-Face-SDK-Android\Face-SDK-Android\MyApplication\app\build\intermediates\pre-dexed\release\classes-89ddc5fa80bb479014ff3d5a2fed3a264240d11e.jar" />
+    </item>
+
+</items>
