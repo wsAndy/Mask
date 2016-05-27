@@ -46,10 +46,9 @@ public class Mixer extends ActionBarActivity {
     ImageButton img_btn_plus;
     int bgIndex;
 
-    static float[] faceFrame;
+    //static float[] faceFrame;
 
-    private FaceServiceClient faceServiceClient =
-            new FaceServiceRestClient("01f454dd9bed4d239eb5e1bf5affccc4");
+    private FaceServiceClient faceServiceClient =   new FaceServiceRestClient("92bbba5fbe434af7a34762a8e389d632");
 
     private ProgressDialog detectionProgressDialog;
 
@@ -62,8 +61,7 @@ public class Mixer extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mixer);
 
-
-        faceFrame = new float[4];
+        //faceFrame = new float[4];
         imgview = (ImageView)findViewById(R.id.img_ori);
 
         myTool = new tool();
@@ -76,6 +74,8 @@ public class Mixer extends ActionBarActivity {
 
             if(humanFace.getHeight() > 300 && humanFace.getWidth() > 300)
             {
+                Toast.makeText(Mixer.this,"[test] too big ",Toast.LENGTH_SHORT).show();
+
                 humanFace = myTool.compressImage(humanFace);
             }
 
@@ -117,8 +117,8 @@ public class Mixer extends ActionBarActivity {
     private void img_btn_plus_start() {
         // this bitmap is detected by Oxford.
         // here you can try to compress the bitmap .
-        detectAndFrame(humanFace);
 
+        detectAndFrame(humanFace);
 
     }
 
@@ -127,11 +127,12 @@ public class Mixer extends ActionBarActivity {
 
         Intent intent = new Intent(Mixer.this, Output.class);
 
-        Bundle b = new Bundle();
-        b.putFloatArray("faceFrame",faceFrame);
-        intent.putExtra("imagePath", imagePath);
-        intent.putExtra("bgIndex",bgIndex);
-        intent.putExtras(b);
+//        Bundle b = new Bundle();
+//        b.putFloatArray("faceFrame",faceFrame);
+//        intent.putExtra("imagePath", imagePath);  // 这个的作用几乎就没有了，在剪切那边我们使用一个临时的图片来替代了
+        intent.putExtra("bgIndex", bgIndex);
+//        intent.putExtras(b);
+        Toast.makeText(Mixer.this,"Mixer",Toast.LENGTH_SHORT).show();
 
         startActivity(intent);
     }
@@ -195,14 +196,18 @@ public class Mixer extends ActionBarActivity {
                     }
                     @Override
                     protected void onPostExecute(Face[] result) {
+                        Toast.makeText(Mixer.this,"  result  !", Toast.LENGTH_LONG).show();
                         //TODO: update face frames
                         detectionProgressDialog.dismiss();
                         if (result == null) {
-                             return;
+                            Toast.makeText(Mixer.this,"Have not accept the message from server.", Toast.LENGTH_LONG).show();
+                            return;
                         }
 
                         if(result.length > 0) {
                             imgview.setImageBitmap(drawFaceRectanglesOnBitmap(imageBitmap, result));
+
+//                            Toast.makeText(Mixer.this," HAHAH !", Toast.LENGTH_LONG).show();
                             imageBitmap.recycle();
                             jump();
                         }else{
@@ -235,63 +240,20 @@ public class Mixer extends ActionBarActivity {
 
                 FaceLandmarks facelandmarks = face.faceLandmarks;
 
-                RectF eyeRectF = new RectF(
-                        (float)(min(facelandmarks.eyebrowLeftOuter.x, facelandmarks.eyeLeftOuter.x)),
-                        (float)(min(facelandmarks.eyebrowLeftInner.y, facelandmarks.eyebrowLeftOuter.y,
-                                facelandmarks.eyebrowRightInner.y, facelandmarks.eyebrowRightOuter.y)),
-                        (float)(max(facelandmarks.eyebrowRightOuter.x,facelandmarks.eyeRightOuter.x)),
-                        (float)(max(facelandmarks.eyeLeftBottom.y,facelandmarks.eyeRightBottom.y))
-                );
 
-                Toast.makeText(Mixer.this, eyeRectF.left + " "+
-                        eyeRectF.top + " "+eyeRectF.right + " " + eyeRectF.bottom
-                        ,Toast.LENGTH_SHORT).show();
-//                RectF noseRectF = new RectF(
-//                        (float)(min(facelandmarks.noseLeftAlarOutTip.x,facelandmarks.noseLeftAlarTop.x)),
-//                        (float)(min(facelandmarks.noseLeftAlarTop.y,facelandmarks.noseRightAlarTop.y)),
-//                        (float)(max(facelandmarks.noseRightAlarOutTip.x,facelandmarks.noseRightAlarTop.y)),
-//                        (float)(max(facelandmarks.noseTip.y,facelandmarks.noseLeftAlarOutTip.y,
-//                                facelandmarks.noseRightAlarOutTip.y))
-//                );
-//                RectF mouthRectF = new RectF(
-//                        (float)(facelandmarks.mouthLeft.x),
-//                        (float)(facelandmarks.upperLipTop.y),
-//                        (float)(facelandmarks.mouthRight.x),
-//                        (float)(facelandmarks.upperLipBottom.y)
-//                );
+//                Bitmap map_eyes = myTool.getClipImage(originalBitmap,faceRectF);
+                //  x y width height
+                double X = facelandmarks.eyebrowLeftOuter.x ;
+                double Y = min(facelandmarks.eyebrowLeftOuter.y,facelandmarks.eyebrowRightOuter.y,facelandmarks.noseRootLeft.y,facelandmarks.noseRootRight.y);
+                double width = facelandmarks.eyebrowRightOuter.x - facelandmarks.eyebrowLeftOuter.x;
+                double height = facelandmarks.underLipBottom.y - min(facelandmarks.eyebrowLeftOuter.y,facelandmarks.eyebrowRightOuter.y)*0.9;
 
-                Bitmap map_eyes = myTool.getClipImage(originalBitmap,eyeRectF);
-//                Bitmap map_nose = myTool.getClipImage(originalBitmap,noseRectF);
-//                Bitmap map_mouth = myTool.getClipImage(originalBitmap, mouthRectF);
-
+                Bitmap map_eyes = Bitmap.createBitmap(originalBitmap,(int)X,(int)Y,(int)width,(int)height );
 
                 File sd = Environment.getExternalStorageDirectory();
                 String path = sd.getPath() + "/CrazyMask/tem";
 
-                myTool.saveMyBitmap(map_eyes, path, "img_eyes");
-//                myTool.saveMyBitmap(map_nose, path, "img_nose.jpg");
-//                myTool.saveMyBitmap(map_mouth, path, "img_mouth.jpg");
-                // here you need not to transmit the path to next layout since yoou know the path
-
-//                RectF oval = new RectF(
-//                        (float)( facelandmarks.eyebrowLeftOuter.x) ,
-//                        (float)((facelandmarks.eyebrowLeftOuter.y + facelandmarks.eyebrowLeftOuter.y)/2-
-//                                (facelandmarks.noseRootLeft.y+facelandmarks.noseRootRight.y-
-//                                        facelandmarks.eyebrowLeftInner.y-facelandmarks.eyebrowRightInner.y)/4),
-//                        (float)(facelandmarks.eyebrowRightOuter.x),
-//                        (float)(1.8*facelandmarks.underLipBottom.y - facelandmarks.upperLipTop.y)
-//
-//                );
-//
-//                //test, you also change the tool's
-//                canvas.drawRect(oval,paint);
-//                faceFrame[0] = (float)( facelandmarks.eyebrowLeftOuter.x) ;
-//                faceFrame[1] = (float)((facelandmarks.eyebrowLeftOuter.y + facelandmarks.eyebrowLeftOuter.y)/2-
-//                                (facelandmarks.noseRootLeft.y+facelandmarks.noseRootRight.y-
-//                                        facelandmarks.eyebrowLeftInner.y-facelandmarks.eyebrowRightInner.y)/4);
-//                faceFrame[2]=(float)(facelandmarks.eyebrowRightOuter.x);
-//                faceFrame[3]=(float)(2*facelandmarks.underLipBottom.y - facelandmarks.upperLipTop.y);
-
+                myTool.saveMyBitmap(map_eyes, path, "img_face");
 
             }
         }

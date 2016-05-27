@@ -84,8 +84,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
     }
-
-    private int getbgIndex(int bgIndex) {
+   private int getbgIndex(int bgIndex) {
 
         switch (bgIndex){
             case 1:
@@ -210,6 +209,7 @@ public class MainActivity extends ActionBarActivity {
             String picturePath = cursor.getString(columnIndex);
             cursor.close();
 
+//            Toast.makeText(MainActivity.this,"Main!",Toast.LENGTH_SHORT).show();
             toMixer(picturePath);
         }
 

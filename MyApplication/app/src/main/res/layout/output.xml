@@ -8,13 +8,16 @@
     >
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/img_output"
         android:padding="2dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentTop="true"
-        android:layout_above="@+id/img_btn_save" />
+
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        />
+        <!--android:layout_alignParentTop="true" />-->
+    <!--android:layout_gravity= "center_vertical"-->
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -51,22 +54,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/img_mouth"
-        android:layout_centerVertical="true"
-        android:layout_alignBottom="@+id/img_output"
-        android:layout_toRightOf="@+id/img_btn_trash"
-        android:layout_toEndOf="@+id/img_btn_trash" />
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/img_nose"
-        android:layout_alignBottom="@+id/img_output"/>
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/img_eyes"
+        android:id="@+id/img_face"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 
