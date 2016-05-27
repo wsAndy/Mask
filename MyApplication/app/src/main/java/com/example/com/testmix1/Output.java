@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,11 +16,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.DisplayMetrics;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -45,22 +42,29 @@ public class Output extends Activity implements View.OnTouchListener {
     private int lastX,lastY;
 
 
-//    String img_path;
+    String img_path;
     int bgIndex;
 
     int mean ;
     float var;
     ImageView img_output;
-    ImageView img_Face;
+    ImageView img_eyes;
+    ImageView img_nose;
+    ImageView img_mouth;
 
 
     Bitmap oribitmap;
     Bitmap bgbitmap;
-    Bitmap afterFusion;
+    Bitmap testbm;
 
     tool mytool;
+    RectF faceRecf;
 
-    Bitmap humanFace;
+    Bitmap eyes;
+    Bitmap nose;
+    Bitmap mouth;
+
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,62 +73,53 @@ public class Output extends Activity implements View.OnTouchListener {
         mytool = new tool();
         img_output = (ImageView)findViewById(R.id.img_output);
 
-        img_Face = (ImageView)findViewById(R.id.img_face);
+        img_eyes = (ImageView)findViewById(R.id.img_eyes);
+        img_nose = (ImageView)findViewById(R.id.img_nose);
+        img_mouth  = (ImageView)findViewById(R.id.img_mouth);
 
         Intent intent = getIntent();
         if(intent!=null)
         {
             Bundle b = this.getIntent().getExtras();
+          //  faceFrame = b.getFloatArray("faceFrame");
+            img_path = intent.getStringExtra("imagePath");
             bgIndex = intent.getIntExtra("bgIndex",1);
         }
 
 
+//        Toast.makeText(Output.this,bgIndex+" ",Toast.LENGTH_SHORT).show();
+
         mean = 20;
         var = 15;
 
-        /**
-         * get the background index
-         * */
         bgbitmap = getBgFromIndex(bgIndex);
+
+        oribitmap = BitmapFactory.decodeFile(img_path); // clip
+        if(oribitmap.getHeight() > 300 && oribitmap.getWidth() > 300)
+        {
+            oribitmap = mytool.compressImage(oribitmap);
+        }
         img_output.setImageBitmap(bgbitmap);
 
-        /**
-         *  get the temperatory face
-         * */
         File sd = Environment.getExternalStorageDirectory();
         String path = sd.getPath() + "/CrazyMask/tem/";
-        humanFace= BitmapFactory.decodeFile(path + "img_face.png");
-        humanFace = mytool.getSumiao(humanFace, mean, var);
-        /**
-         *  here the temperatory face need to be clipped the four corner,or in other words ,add a mask
-         * */
-        humanFace = mytool.addMask(humanFace);
-        /**
-         *  expand the image size
-         *  ITS TOO BIG!!!
-         * */
-        humanFace = mytool.bigImage(humanFace);
 
+        eyes= BitmapFactory.decodeFile(path + "img_eyes.png");
+        eyes = mytool.getSumiao(eyes,mean,var);
+        eyes = mytool.bigImage(eyes);
+        img_eyes.setImageBitmap(eyes);
 
-        /**
-         *  get the screen's information
-         * */
+         // img_nose.setImageBitmap(BitmapFactory.decodeFile(path+"img_nose.png"));
+//        img_mouth.setImageBitmap(BitmapFactory.decodeFile(path+"img_mouth.png"));
+
+        img_eyes.setOnTouchListener(this);
+//        img_nose.setOnTouchListener(this);
+//        img_mouth.setOnTouchListener(this);
+
         DisplayMetrics dm = getResources().getDisplayMetrics();
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels - 30;
-        /**
-         *  move the face
-         * */
-        img_Face.setImageBitmap(humanFace);
-        img_Face.setOnTouchListener(this);
 
-
-
-
-//        Toast.makeText(Output.this,"faceWidth: "+humanFace.getWidth() +"\nfaceHeight: "+humanFace.getHeight()+
-//                "\nbgWidth: "+bgbitmap.getWidth()+"\nbgHeight: "+bgbitmap.getHeight(),Toast.LENGTH_LONG
-//        ).show();
-//        img_Face.getLeft() - img_output.getLeft(),img_Face.getTop() - img_output.getTop());
 
 
 
@@ -188,9 +183,7 @@ public class Output extends Activity implements View.OnTouchListener {
     }
 
 
-    /**
-     *   get the background image
-     * */
+
     private Bitmap getBgFromIndex(int bgIndex) {
         File sd = Environment.getExternalStorageDirectory();
         String path = sd.getPath() + "/CrazyMask/background";
@@ -200,26 +193,14 @@ public class Output extends Activity implements View.OnTouchListener {
     }
 
 
-    /**
-     *   save the fusion image
-     *
-     * */
     private void img_btn_save() {
-
-
-        /**
-         *   use getleft() getTop() to locate te moving bitmap and add it with background
-         *   getLeft() : left distance to the screen's edge
-         *   getTop() : top distance to the screen's edge
-         * */
-        afterFusion = mytool.fusionImage(humanFace,bgbitmap,img_Face.getLeft() - img_output.getLeft(), img_Face.getTop() - img_output.getTop());
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
         String date_str = formatter.format(new java.util.Date());
         File sd = Environment.getExternalStorageDirectory();
         String path = sd.getPath() + "/CrazyMask/outMask";
 
-        mytool.saveMyBitmap( afterFusion , path,date_str);
+        mytool.saveMyBitmap(testbm, path,date_str);
         Toast.makeText(Output.this, "Image saved in "+path+date_str+".png",Toast.LENGTH_LONG).show();
     }
 
@@ -241,15 +222,11 @@ public class Output extends Activity implements View.OnTouchListener {
         {
             case MotionEvent.ACTION_DOWN:
                // Toast.makeText(Output.this,"down",Toast.LENGTH_SHORT).show();
-                // get the place when you touch the screen
                 lastX = (int)event.getRawX();
                 lastY = (int)event.getRawY();
 
                 break;
             case MotionEvent.ACTION_MOVE:
-
-
-
                 int dx = (int)event.getRawX() - lastX;
                 int dy = (int)event.getRawY() - lastY;
 
@@ -287,7 +264,6 @@ public class Output extends Activity implements View.OnTouchListener {
 
        return true;
     }
-
 
 
 }

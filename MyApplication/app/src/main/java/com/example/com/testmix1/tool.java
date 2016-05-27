@@ -13,8 +13,6 @@ import android.graphics.Region;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ThumbnailUtils;
 import android.os.Environment;
-import android.util.Log;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
@@ -285,7 +283,7 @@ public class tool  {
         RectF faceRect = faceRecf;
 
         float [] faceCornerii = new float[]{
-                20, 22, 20, 22,30,40,30,40
+                40, 45, 40, 45,30,80,30,80
         };
 //        float [] faceCornerii = new float[]{
 //                4, 4, 4, 4,3,8,3,8
@@ -332,48 +330,37 @@ public class tool  {
     }
 
 
-
-/**
- *  adaquate face to the background
- *  also change the scales of mid_x and mid_y
- * */
-    public Bitmap fusionImage(Bitmap faceBp, Bitmap bg,int mid_x,int mid_y)
+    public Bitmap fusionImage(Bitmap faceBp, Bitmap bg)
     {
 
-//        float sizeWidth = bg.getWidth() / faceBp.getWidth();
-//        float sizeHeigh = bg.getHeight() / faceBp.getHeight();
-//
-//        Matrix matrix = new Matrix();
-//
-//        if(sizeWidth > 1 || sizeHeigh > 1)
-//        {
-//            matrix.postScale((float)(0.5*sizeWidth),(float)(0.5*sizeHeigh));
-//        }
-//        else {
-//            matrix.postScale(1 / sizeWidth, 1 / sizeHeigh); // <1 的缩小
-//        }
-//
-//        Bitmap resizeFace = Bitmap.createBitmap(faceBp,0,0,faceBp.getWidth(),faceBp.getHeight()
-//                ,matrix,true);
+        float sizeWidth = bg.getWidth()/faceBp.getWidth();
+        float sizeHeigh =  bg.getHeight()/faceBp.getHeight();
 
-//        int newWidth = (int)(scaleWidth*0.4);
-//        int newHeigh = (int)(scaleHeigh*0.4);
-////        mid_x = (int)(mid_x*scaleWidth);
-////        mid_y = (int)(mid_y*scaleHeigh);
-//
-//        faceBp = ThumbnailUtils.extractThumbnail(faceBp, newWidth,newHeigh);
+        Matrix matrix = new Matrix();
+
+        if(sizeWidth > 1 || sizeHeigh > 1)
+        {
+            matrix.postScale((float)(0.6*sizeWidth),(float)(0.6*sizeHeigh));
+        }
+        else {
+            matrix.postScale(1 / sizeWidth, 1 / sizeHeigh); // <1 的缩小
+        }
+
+        Bitmap resizeFace = Bitmap.createBitmap(faceBp,0,0,faceBp.getWidth(),faceBp.getHeight()
+                ,matrix,true);
 
         Bitmap outFace = Bitmap.createBitmap(bg.getWidth(),bg.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(outFace);
         canvas.drawBitmap(bg,0,0,null);
-        canvas.drawBitmap(faceBp,mid_x ,mid_y,null);
+        canvas.drawBitmap(resizeFace,(bg.getWidth()-resizeFace.getWidth())/2,
+                (bg.getHeight()-resizeFace.getHeight())/2,null);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
 
-//        faceBp.recycle();
-//        faceBp = null;
-//        bg.recycle();
-//        bg =null;
+        faceBp.recycle();
+        faceBp = null;
+        bg.recycle();
+        bg =null;
         return outFace;
     }
 
@@ -390,7 +377,7 @@ public class tool  {
 //            scale = 200/height;
 //        }
 
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, 128,128);
+        bitmap = ThumbnailUtils.extractThumbnail(bitmap,128, 128);
         return bitmap;
     }
 
@@ -398,20 +385,9 @@ public class tool  {
     {
         double width = bitmap.getWidth();
         double height = bitmap.getHeight();
-        double scale = 256/width;
+        double scale = 512/width;
 
         bitmap = ThumbnailUtils.extractThumbnail(bitmap,(int)(scale*width),(int)(scale*height));
-        return bitmap;
-    }
-
-
-
-    public Bitmap addMask(Bitmap bitmap)
-    {
-        int length =bitmap.getHeight();
-        int width = bitmap.getWidth();
-        RectF rect = new RectF(0,0,width,length);
-        bitmap = getClipImage(bitmap,rect);
         return bitmap;
     }
 
