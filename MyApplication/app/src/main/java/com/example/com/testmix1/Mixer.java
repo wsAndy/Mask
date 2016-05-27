@@ -49,7 +49,7 @@ public class Mixer extends ActionBarActivity {
     static float[] faceFrame;
 
     private FaceServiceClient faceServiceClient =
-            new FaceServiceRestClient("01f454dd9bed4d239eb5e1bf5affccc4");
+            new FaceServiceRestClient("92bbba5fbe434af7a34762a8e389d632");
 
     private ProgressDialog detectionProgressDialog;
 
@@ -74,6 +74,9 @@ public class Mixer extends ActionBarActivity {
             imagePath = intent.getStringExtra("imagePath");
             humanFace = BitmapFactory.decodeFile(imagePath);
 
+            /**
+             *   compress the image to speed up the process
+             * */
             if(humanFace.getHeight() > 300 && humanFace.getWidth() > 300)
             {
                 humanFace = myTool.compressImage(humanFace);
@@ -118,21 +121,15 @@ public class Mixer extends ActionBarActivity {
         // this bitmap is detected by Oxford.
         // here you can try to compress the bitmap .
         detectAndFrame(humanFace);
-
-
     }
 
+    /**
+     *  jump into the next screen
+     * */
     private  void jump()
     {
-
         Intent intent = new Intent(Mixer.this, Output.class);
-
-        Bundle b = new Bundle();
-        b.putFloatArray("faceFrame",faceFrame);
-        intent.putExtra("imagePath", imagePath);
         intent.putExtra("bgIndex",bgIndex);
-        intent.putExtras(b);
-
         startActivity(intent);
     }
     public boolean onKeyDown(int keyCode, KeyEvent event)
@@ -147,10 +144,9 @@ public class Mixer extends ActionBarActivity {
 
 
 
-
-    // Detect faces by uploading face images
-// Frame faces after detection
-
+    /**
+     *   detect the face
+     * */
     private void detectAndFrame(final Bitmap imageBitmap)
     {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -231,67 +227,36 @@ public class Mixer extends ActionBarActivity {
 
         if (faces != null) {
             //for (Face face : faces) {
-            {   Face face = faces[0];// 只选择第一个
+            {
+                /**
+                 *   here we only choose the biggest face in the picture
+                 * */
+                Face face = faces[0];
 
+
+                /**
+                 *    get the features' sites on the face
+                 * */
                 FaceLandmarks facelandmarks = face.faceLandmarks;
+                int left = (int)(min(facelandmarks.eyebrowLeftOuter.x,facelandmarks.eyeLeftTop.x));
+                int top = (int)(min(facelandmarks.eyebrowLeftInner.y,facelandmarks.eyebrowRightInner.y));
+                int right = (int)(max(facelandmarks.eyebrowRightOuter.x, facelandmarks.eyeRightOuter.y));
+                int bottom = (int)(2*facelandmarks.underLipBottom.y-facelandmarks.upperLipBottom.y);
 
                 RectF eyeRectF = new RectF(
-                        (float)(min(facelandmarks.eyebrowLeftOuter.x, facelandmarks.eyeLeftOuter.x)),
-                        (float)(min(facelandmarks.eyebrowLeftInner.y, facelandmarks.eyebrowLeftOuter.y,
-                                facelandmarks.eyebrowRightInner.y, facelandmarks.eyebrowRightOuter.y)),
-                        (float)(max(facelandmarks.eyebrowRightOuter.x,facelandmarks.eyeRightOuter.x)),
-                        (float)(max(facelandmarks.eyeLeftBottom.y,facelandmarks.eyeRightBottom.y))
+                        left,
+                        top,
+                        right,
+                        bottom
                 );
 
-                Toast.makeText(Mixer.this, eyeRectF.left + " "+
-                        eyeRectF.top + " "+eyeRectF.right + " " + eyeRectF.bottom
-                        ,Toast.LENGTH_SHORT).show();
-//                RectF noseRectF = new RectF(
-//                        (float)(min(facelandmarks.noseLeftAlarOutTip.x,facelandmarks.noseLeftAlarTop.x)),
-//                        (float)(min(facelandmarks.noseLeftAlarTop.y,facelandmarks.noseRightAlarTop.y)),
-//                        (float)(max(facelandmarks.noseRightAlarOutTip.x,facelandmarks.noseRightAlarTop.y)),
-//                        (float)(max(facelandmarks.noseTip.y,facelandmarks.noseLeftAlarOutTip.y,
-//                                facelandmarks.noseRightAlarOutTip.y))
-//                );
-//                RectF mouthRectF = new RectF(
-//                        (float)(facelandmarks.mouthLeft.x),
-//                        (float)(facelandmarks.upperLipTop.y),
-//                        (float)(facelandmarks.mouthRight.x),
-//                        (float)(facelandmarks.upperLipBottom.y)
-//                );
-
+                /**
+                 *   clip the features from the face and save it in a temporary file
+                 * */
                 Bitmap map_eyes = myTool.getClipImage(originalBitmap,eyeRectF);
-//                Bitmap map_nose = myTool.getClipImage(originalBitmap,noseRectF);
-//                Bitmap map_mouth = myTool.getClipImage(originalBitmap, mouthRectF);
-
-
                 File sd = Environment.getExternalStorageDirectory();
                 String path = sd.getPath() + "/CrazyMask/tem";
-
                 myTool.saveMyBitmap(map_eyes, path, "img_eyes");
-//                myTool.saveMyBitmap(map_nose, path, "img_nose.jpg");
-//                myTool.saveMyBitmap(map_mouth, path, "img_mouth.jpg");
-                // here you need not to transmit the path to next layout since yoou know the path
-
-//                RectF oval = new RectF(
-//                        (float)( facelandmarks.eyebrowLeftOuter.x) ,
-//                        (float)((facelandmarks.eyebrowLeftOuter.y + facelandmarks.eyebrowLeftOuter.y)/2-
-//                                (facelandmarks.noseRootLeft.y+facelandmarks.noseRootRight.y-
-//                                        facelandmarks.eyebrowLeftInner.y-facelandmarks.eyebrowRightInner.y)/4),
-//                        (float)(facelandmarks.eyebrowRightOuter.x),
-//                        (float)(1.8*facelandmarks.underLipBottom.y - facelandmarks.upperLipTop.y)
-//
-//                );
-//
-//                //test, you also change the tool's
-//                canvas.drawRect(oval,paint);
-//                faceFrame[0] = (float)( facelandmarks.eyebrowLeftOuter.x) ;
-//                faceFrame[1] = (float)((facelandmarks.eyebrowLeftOuter.y + facelandmarks.eyebrowLeftOuter.y)/2-
-//                                (facelandmarks.noseRootLeft.y+facelandmarks.noseRootRight.y-
-//                                        facelandmarks.eyebrowLeftInner.y-facelandmarks.eyebrowRightInner.y)/4);
-//                faceFrame[2]=(float)(facelandmarks.eyebrowRightOuter.x);
-//                faceFrame[3]=(float)(2*facelandmarks.underLipBottom.y - facelandmarks.upperLipTop.y);
-
 
             }
         }

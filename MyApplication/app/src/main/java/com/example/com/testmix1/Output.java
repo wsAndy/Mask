@@ -41,29 +41,17 @@ public class Output extends Activity implements View.OnTouchListener {
     private int screenHeight;
     private int lastX,lastY;
 
-
-    String img_path;
     int bgIndex;
 
     int mean ;
     float var;
     ImageView img_output;
-    ImageView img_eyes;
-    ImageView img_nose;
-    ImageView img_mouth;
+    ImageView img_face;
 
-
-    Bitmap oribitmap;
     Bitmap bgbitmap;
-    Bitmap testbm;
-
+    Bitmap imgFusion;
     tool mytool;
-    RectF faceRecf;
-
-    Bitmap eyes;
-    Bitmap nose;
-    Bitmap mouth;
-
+    Bitmap imgFace;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,77 +60,43 @@ public class Output extends Activity implements View.OnTouchListener {
 
         mytool = new tool();
         img_output = (ImageView)findViewById(R.id.img_output);
-
-        img_eyes = (ImageView)findViewById(R.id.img_eyes);
-        img_nose = (ImageView)findViewById(R.id.img_nose);
-        img_mouth  = (ImageView)findViewById(R.id.img_mouth);
+        img_face = (ImageView)findViewById(R.id.img_face);
 
         Intent intent = getIntent();
         if(intent!=null)
         {
-            Bundle b = this.getIntent().getExtras();
-          //  faceFrame = b.getFloatArray("faceFrame");
-            img_path = intent.getStringExtra("imagePath");
             bgIndex = intent.getIntExtra("bgIndex",1);
         }
 
-
-//        Toast.makeText(Output.this,bgIndex+" ",Toast.LENGTH_SHORT).show();
 
         mean = 20;
         var = 15;
 
         bgbitmap = getBgFromIndex(bgIndex);
 
-        oribitmap = BitmapFactory.decodeFile(img_path); // clip
-        if(oribitmap.getHeight() > 300 && oribitmap.getWidth() > 300)
-        {
-            oribitmap = mytool.compressImage(oribitmap);
-        }
         img_output.setImageBitmap(bgbitmap);
 
+        /**
+         *    get the feature image from temporary file.
+         * */
         File sd = Environment.getExternalStorageDirectory();
         String path = sd.getPath() + "/CrazyMask/tem/";
 
-        eyes= BitmapFactory.decodeFile(path + "img_eyes.png");
-        eyes = mytool.getSumiao(eyes,mean,var);
-        eyes = mytool.bigImage(eyes);
-        img_eyes.setImageBitmap(eyes);
+        imgFace= BitmapFactory.decodeFile(path + "img_eyes.png");
+        imgFace = mytool.getSumiao(imgFace, mean, var);
+        imgFace = mytool.bigImage(imgFace);
+        img_face.setImageBitmap(imgFace);
 
-         // img_nose.setImageBitmap(BitmapFactory.decodeFile(path+"img_nose.png"));
-//        img_mouth.setImageBitmap(BitmapFactory.decodeFile(path+"img_mouth.png"));
+        /*
+        *   listen to move the face
+        * */
+        img_face.setOnTouchListener(this);
 
-        img_eyes.setOnTouchListener(this);
-//        img_nose.setOnTouchListener(this);
-//        img_mouth.setOnTouchListener(this);
 
         DisplayMetrics dm = getResources().getDisplayMetrics();
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels - 30;
 
-
-
-
-        // here I start to try a new way that the eyes nose and mouth could move.
-        // first I need to set these three imageview.
-        // then let them move and get the right place.
-        // finally , press the button and save the picture.
-
-
-
-        // this is also a test, since the faceFrame is not the best one.
-        // I first get the faceRecf ,then clip the clip fce again.
-
-//        faceRecf = new RectF(faceFrame[0],faceFrame[1],faceFrame[2],faceFrame[3]);
-
-        // test!!!!!!!
-//        oribitmap = mytool.getClipImage(oribitmap, faceRecf); // get the clip picture , but its not good, I think
-//
-//        testbm =  mytool.getSumiao(oribitmap, mean, var);
-//        testbm = mytool.fusionImage(testbm, bgbitmap);
-//        img_output.setImageBitmap( testbm);
-
-        //----------------------------
 
         ImageButton btn_trash = (ImageButton)findViewById(R.id.img_btn_trash);
         ImageButton btn_share = (ImageButton)findViewById(R.id.img_btn_share);
@@ -184,6 +138,9 @@ public class Output extends Activity implements View.OnTouchListener {
 
 
 
+    /**
+     *    get background image
+     * */
     private Bitmap getBgFromIndex(int bgIndex) {
         File sd = Environment.getExternalStorageDirectory();
         String path = sd.getPath() + "/CrazyMask/background";
@@ -193,15 +150,31 @@ public class Output extends Activity implements View.OnTouchListener {
     }
 
 
+    /**
+     *    save the image
+     * */
     private void img_btn_save() {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
-        String date_str = formatter.format(new java.util.Date());
-        File sd = Environment.getExternalStorageDirectory();
-        String path = sd.getPath() + "/CrazyMask/outMask";
+        int jud_left = img_face.getLeft() - img_output.getLeft();
+        int jud_top = img_face.getTop() - img_output.getTop();
+        if(jud_left > 0 && jud_top > 0) {
 
-        mytool.saveMyBitmap(testbm, path,date_str);
-        Toast.makeText(Output.this, "Image saved in "+path+date_str+".png",Toast.LENGTH_LONG).show();
+            /**
+             *   get the mixed image, and save it
+             * */
+            imgFusion = mytool.fusionImage(imgFace, bgbitmap, jud_left, jud_top);
+
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss");
+            String date_str = formatter.format(new java.util.Date());
+            File sd = Environment.getExternalStorageDirectory();
+            String path = sd.getPath() + "/CrazyMask/outMask";
+            mytool.saveMyBitmap(imgFusion, path,date_str);
+            Toast.makeText(Output.this, "Image saved in "+path+date_str+".png",Toast.LENGTH_LONG).show();
+        }
+        else{
+            Toast.makeText(Output.this,"Error: please move the face into the background~",Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void img_btn_share() {
@@ -267,11 +240,5 @@ public class Output extends Activity implements View.OnTouchListener {
 
 
 }
-
-
-// LOG
-// Today, the test of mix lasts about  6 hours.
-// And the Bug I find is that
-
 
 
